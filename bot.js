@@ -9,6 +9,8 @@ sys.inherits(Bot, uaclient.UAClient);
 
 larabot = new Bot;
 Bot.prototype.announce_user_page = function(a) {
-    sys.puts("= paged!");
+    larabot.flatten(a);
+    sys.puts("= paged by "+a["fromname"]+"/"+a["fromid"]+", ``"+a["text"]+"''");
+    larabot.page(a["fromid"], "thank you for paging larabot, have a nice day");
 }
 larabot.connect(process.argv[2], process.argv[3]);

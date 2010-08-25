@@ -8,6 +8,17 @@ function UAClient() {
     this.parser = new edf.EDFParser();
 };
 
+UAClient.prototype.safestring = function(s) {
+    s.replace(/"/g, '\\"');
+    return s;
+}
+
+UAClient.prototype.flatten = function(q) {
+    for(i=0;i<q.children.length;i++){
+        sys.puts("H "+q.children[i].tag+" = "+q.children[i].value);
+        q[q.children[i].tag] = q.children[i].value};
+}
+
 UAClient.prototype.edf_on = function() {
     this.stream.write("<request=\"user_login\"><name=\"bot\"/><password=\"moo\"/></>");
     this.state = 1; // trying to login
@@ -20,6 +31,12 @@ UAClient.prototype.reply_user_login = function(a) {
 UAClient.prototype.announce_user_page = function(a) {
     // how to find the fromname bit?
     sys.puts("= got a page");
+}
+
+UAClient.prototype.page = function(to, text) {
+    edf = "<request=\"user_contact\"><toid="+to+"/><text=\""+this.safestring(text)+"\"/></>";
+    sys.puts("> "+edf);
+    this.stream.write(edf);
 }
 
 UAClient.prototype.connect = function() {
