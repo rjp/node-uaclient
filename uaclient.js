@@ -6,6 +6,8 @@ function UAClient() {
     this.stream = undefined;
     this.state = undefined;
     this.parser = new edf.EDFParser();
+    this.username = undefined;
+    this.password = undefined;
 };
 
 UAClient.prototype.safestring = function(s) {
@@ -20,7 +22,7 @@ UAClient.prototype.flatten = function(q) {
 }
 
 UAClient.prototype.edf_on = function() {
-    this.stream.write("<request=\"user_login\"><name=\"bot\"/><password=\"moo\"/></>");
+    this.stream.write("<request=\"user_login\"><name=\""+this.username+"\"/><password=\""+this.password+"\"/></>");
     this.state = 1; // trying to login
 };
 
@@ -39,7 +41,9 @@ UAClient.prototype.page = function(to, text) {
     this.stream.write(edf);
 }
 
-UAClient.prototype.connect = function() {
+UAClient.prototype.connect = function(user, pass) {
+    this.username = user;
+    this.password = pass;
     this.state = 0;
     this.stream = net.createConnection(2020, 'ua2.org');
     sys.puts(this.stream);
