@@ -71,6 +71,15 @@ UAClient.prototype.connect = function(user, pass) {
 	
 	this.stream.addListener("close", function(data) {
 	    sys.puts("- disconnected");
+        if (that["close"] != undefined) {
+            that["close"]();
+        }
+	});
+	this.stream.addListener("end", function(data) {
+	    sys.puts("- ended");
+        if (that["close"] != undefined) {
+            that["close"]();
+        }
 	});
 };
 
