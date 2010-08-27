@@ -15,13 +15,6 @@ function UAClient() {
 	    this.stream.write("<request=\"user_login\"><name=\""+this.username+"\"/><password=\""+this.password+"\"/></>");
 	    this.state = 1; // trying to login
 	});
-	self.addListener("reply_user_login", function(a) {
-	    sys.puts("= logged in");
-	});
-	self.addListener("announce_user_page", function(a) {
-	    // how to find the fromname bit?
-	    sys.puts("= got a page");
-	});
 };
 sys.inherits(UAClient, events.EventEmitter);
 
