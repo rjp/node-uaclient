@@ -63,6 +63,7 @@ UAClient.prototype.connect = function(user, pass) {
 	    method = parsed.tag + "_" + parsed.value;
 	    sys.puts("E "+method);
 	
+        // TODO change this to be node.js Events
 	    if (that[method] != undefined) {
             sys.puts("! "+method);
             that[method](parsed);
