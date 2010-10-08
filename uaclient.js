@@ -3,7 +3,7 @@ var net = require('net'),
     events = require('events'),
     edf = require('edfparser');
 
-var user_byname = new Array();
+user_byname = new Array();
 
 function flatten(q) {
     for(i=0;i<q.children.length;i++){
@@ -19,7 +19,7 @@ function cache_user_list(tree) {
         if (user.tag == 'user') { // not all EDF children are useful
             var id = user.value;
             flatten(user);
-            sys.puts(user.name+" has ID "+id);
+//            sys.puts(user.name+" has ID "+id);
             user_byname[user.name] = user;
         }
     }
@@ -49,6 +49,18 @@ function UAClient() {
 	});
     // cache the user list
     self.addListener("reply_user_list", cache_user_list);
+
+    var that = self;
+
+	self.addListener("parsed", function(j) {
+	    parsed = JSON.parse(j);
+        for(i=0; i<parsed.parsed; i++) {
+		    method = parsed.trees[i].tag + "_" + parsed.trees[i].value;
+		    sys.puts("E "+method);
+	        that.emit(method, parsed.trees[i]);
+        }
+	});
+	
 };
 sys.inherits(UAClient, events.EventEmitter);
 
@@ -59,7 +71,7 @@ UAClient.prototype.safestring = function(s) {
 
 UAClient.prototype.flatten = function(q) {
     for(i=0;i<q.children.length;i++){
-        sys.puts("H "+q.children[i].tag+" = "+q.children[i].value);
+        //sys.puts("H "+q.children[i].tag+" = "+q.children[i].value);
         q[q.children[i].tag] = q.children[i].value};
 }
 
@@ -75,6 +87,8 @@ UAClient.prototype.connect = function(user, pass) {
     this.password = pass;
     this.state = 0;
     this.stream = net.createConnection(4040, 'ua2.org');
+    this.stream.setEncoding('utf8');
+    this.accdata = "";
     sys.puts(this.stream);
     
     var that = this;
@@ -87,16 +101,23 @@ UAClient.prototype.connect = function(user, pass) {
 	
 	this.stream.addListener("data", function(data) {
 	    sys.puts("< ["+data+"]");
-        s_data = ""+data // weirdly, node on fabionudibranch returns data as a character array
-	    j = that.parser.parse(s_data);
-	    parsed = JSON.parse(j);
-        for(i=0; i<parsed.parsed; i++) {
-		    method = parsed.trees[i].tag + "_" + parsed.trees[i].value;
-		    sys.puts("E "+method);
-	        that.emit(method, parsed.trees[i]);
+        s_data = that.accdata+""+data // weirdly, node on fabionudibranch returns data as a character array
+        if (s_data.length > 0) {
+		    j = that.parser.parse(s_data);
+            if (j == 0) {
+                sys.exit();
+            }
+	        if (j[0] == '{') { // parsing worked, let's get on with it
+	            that.accdata = ""; // wipe the accumulation buffer
+	        //    sys.puts("parsed ok, sending event with "+j.length+" bytes");
+	            // sys.puts(j);
+	            that.emit('parsed', j);
+	        } else {
+	            that.accdata = s_data; // save it for next time
+	        }
         }
-	});
-	
+    });
+
 	this.stream.addListener("close", function(data) {
 	    sys.puts("- disconnected");
         if (that["close"] != undefined) {
