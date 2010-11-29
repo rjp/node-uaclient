@@ -1,6 +1,6 @@
 { 
   "name" : "uaclient", 
-  "version" : "0.0.4",
+  "version" : "0.0.5",
   "directories" : { 
 	"lib" : "./lib",
 	"examples" : "./examples",
@@ -8,6 +8,7 @@
   }, 
   "main" : "./lib/uaclient",
   "dependencies": {
-      "log": ">=0.0.0"
+      "log": ">=0.0.0",
+      "profiler": ">=0.0.0"
   }
 }
